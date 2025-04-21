@@ -20,8 +20,8 @@ download.file('https://gdex.ucar.edu/dataset/camels/file/camels_attributes_v2.0.
               'data/camels_attributes_v2.0.pdf')
 
 types <- c("clim", "geol", "soil", "topo", "vege", "hydro")
-
 ```
+
 Getting Basin Characteristics
 ```{r}
 remote_files  <- glue('{root}/camels_{types}.txt')

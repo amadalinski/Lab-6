@@ -1,0 +1,214 @@
+---
+title: "Lab 8: Hyper Parameter Tuning"
+format:
+  html:
+    self-contained: true
+---
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+library(powerjoin)
+library(glue)
+library(vip)
+library(baguette)
+library(visdat)
+library(plotly)
+library(patchwork)
+```
+
+Data Cleaning/Import/Tidy/Transform
+```{r}
+root  <- 'https://gdex.ucar.edu/dataset/camels/file'
+
+# download.file('https://gdex.ucar.edu/dataset/camels/file/camels_attributes_v2.0.pdf', 
+    #        'data/camels_attributes_v2.0.pdf')
+
+types <- c("clim", "geol", "soil", "topo", "vege", "hydro")
+
+remote_files  <- glue('{root}/camels_{types}.txt')
+local_files   <- glue('data/camels_{types}.txt')
+
+walk2(remote_files, local_files, download.file, quiet = TRUE)
+
+camels <- map(local_files, ~read_delim(.x, show_col_types = FALSE))
+
+camels <- power_full_join(camels ,by = 'gauge_id')
+
+summary(camels)
+skimr::skim(camels)
+
+```
+
+Data Splitting
+```{r}
+set.seed(123)
+
+split_lab8 <- initial_split(camels, prop = 0.8)
+train_lab8 <- training(split_lab8)
+test_lab8  <- testing(split_lab8)
+
+rec8 = recipe(q_mean ~ low_prec_freq + p_mean, data = train_lab8) |>
+ # step_rm(gauge_lat, gauge_lon) |>
+  step_unknown(all_nominal_predictors()) |>
+  step_dummy(all_nominal()) |>  
+  step_scale(all_numeric_predictors()) |>  
+  step_center(all_numeric_predictors()) |>
+  step_naomit(all_predictors(), all_outcomes())
+
+folds8 <- vfold_cv(train_lab8, v = 10)
+```
+
+
+Building Models
+```{r}
+rf_model8 <- rand_forest() |> 
+  set_engine("ranger") |> 
+  set_mode("regression")
+
+lm_model8 <- linear_reg() |> 
+  set_engine("lm") |> 
+  set_mode("regression")
+
+xgb_model8 <- boost_tree() |> 
+  set_engine("xgboost") |> 
+  set_mode("regression")
+
+models <- list(
+  rf = rf_model8,
+  lm = lm_model8,
+  xgb = xgb_model8
+)
+
+rm(wf8)
+
+wf8 <- workflow_set(list(rec8), list(lm_model8, rf_model8, xgb_model8)) |>
+  workflow_map('fit_resamples', resamples = folds8) 
+
+autoplot(wf8)
+
+```
+Here we can see the r squared values for all three models. The model with the highest r squared value is the best fit for our data set, so in this case it is the random forest model and that is the one I will move ahead with. Using the regression mode allows us to predict the continuous outcome variable, like q_mean, from our multiple independent variables. 
+
+Model Tuning
+```{r}
+rf_tune <- rand_forest(trees = tune(), min_n = tune()) |>
+  set_engine("ranger") |>
+  set_mode("regression")
+
+wf_tune <-  workflow(rec8, rf_tune)
+```
+
+Check Tunable Values
+```{r}
+dials <- extract_parameter_set_dials(wf_tune) 
+dials$object
+```
+Define the Search Space
+
+```{r}
+my.grid <- dials |> 
+  update(trees = trees(c(50, 500))) |>
+  grid_latin_hypercube(size = 25)
+
+range(my.grid$trees)
+
+plotly::plot_ly(my.grid, 
+               x = ~trees, 
+               y = ~min_n)
+```
+
+Tune the Model
+```{r}
+model_params <-  tune_grid(
+    wf_tune,
+    resamples = folds8,
+    grid = my.grid,
+    metrics = metric_set(rmse, rsq, mae),
+    control = control_grid(save_pred = TRUE)
+  )
+
+autoplot(model_params)
+```
+
+Check the skill of the tuned model
+```{r}
+tuned_results <- tune_grid(
+  wf_tune,
+  resamples = folds8,
+  grid = 25
+)
+
+metrics <- collect_metrics(tuned_results)
+
+show_best(model_params, metric = "mae")
+hp_best <- select_best(model_params, metric = "mae")
+```
+When looking at the show_best tibble, the hyper parameter set that is best for this model is 205 for the trees hyper parameter and 15 for min_n. This hyper parameter has the lowest standard error and the highest mean, showing that this set will work best for my data.
+
+
+Finalize your model
+```{r}
+finalize <- finalize_workflow(wf_tune, hp_best)
+```
+
+Final Model Verification
+```{r}
+final_fit <- last_fit(finalize, split = split_lab8)
+
+collect_metrics(final_fit)
+```
+The final model performs better on the test data than it did on the training data. The final model has a root mean squared error of 0.497, which is the average difference between the predicted values from the model and the actual values. This is much lower than the rmse of the training data, which was about 0.55. The final model also has a higher r-squared value than the training data, with a value of 0.903 compared to 0.88 for the training data. The r-squared value of 0.9 means that about 90% of the variance in the dependent variable can be explained by the independent variable.  
+
+```{r}
+preds <- collect_predictions(final_fit)
+```
+```{r}
+ggplot(preds, aes(x = q_mean, y = .pred, color = .pred)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE, color = "darkblue") +
+  geom_abline(slope = 1, intercept = 0, color = "red") +
+  scale_color_viridis_c(option = "C") +
+  labs(
+    title = "Q Mean Predicted vs. Actual Values",
+    x = "Actual Values",
+    y = "Predicted Values",
+    color = "Prediction"
+  ) +
+  theme_minimal()
+```
+
+Building a Map!
+```{r}
+final_model_fit <- fit(finalize, data = camels)
+predicted_data <- augment(final_model_fit, new_data = camels) |>
+  mutate(residual = (.pred - q_mean^2))
+
+map_pred <- ggplot(predicted_data, aes(x = gauge_lon, y = gauge_lat, color = .pred)) +
+  geom_point(size = 1, alpha = 0.8) +
+  coord_fixed() +
+  scale_fill_viridis_c(option = "C") +
+  labs(
+    title = "Predicted Values",
+    x = "Longitude",
+    y = "Latitude",
+    fill = "Prediction"
+  ) +
+  theme_minimal()
+
+map_resid <- ggplot(predicted_data, aes(x = gauge_lon, y = gauge_lat, color = residual)) +
+  geom_point(size = 1, alpha = 0.8) +
+  coord_fixed() +
+  scale_fill_viridis_c(option = "A") +
+  labs(
+    title = "Squared Residuals",
+    x = "Longitude",
+    y = "Latitude",
+    fill = "Residual²"
+  ) +
+  theme_minimal()
+
+map_pred / map_resid
+
+```
+
