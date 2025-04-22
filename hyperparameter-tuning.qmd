@@ -18,6 +18,7 @@ library(patchwork)
 ```
 
 Data Cleaning/Import/Tidy/Transform
+
 ```{r}
 root  <- 'https://gdex.ucar.edu/dataset/camels/file'
 
@@ -29,9 +30,9 @@ types <- c("clim", "geol", "soil", "topo", "vege", "hydro")
 remote_files  <- glue('{root}/camels_{types}.txt')
 local_files   <- glue('data/camels_{types}.txt')
 
-walk2(remote_files, local_files, download.file, quiet = TRUE)
+#walk2(remote_files, local_files, download.file, quiet = TRUE)
 
-camels <- map(local_files, ~read_delim(.x, show_col_types = FALSE))
+camels <- purrr::map(local_files, ~read_delim(.x, show_col_types = FALSE))
 
 camels <- power_full_join(camels ,by = 'gauge_id')
 

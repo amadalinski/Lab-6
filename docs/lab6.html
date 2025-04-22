@@ -4795,7 +4795,7 @@ vertical-align: -.125em;
 ✖ dplyr::lag()      masks stats::lag()
 ✖ yardstick::spec() masks readr::spec()
 ✖ recipes::step()   masks stats::step()
-• Use tidymodels_prefer() to resolve common conflicts.</code></pre>
+• Learn how to get started at https://www.tidymodels.org/start/</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(powerjoin)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glue)</span>
@@ -5266,19 +5266,22 @@ aridity:p_mean  0.1048449 0.07198145   1.456555 1.458304e-01</code></pre>
 <span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>wf_2 <span class="ot">&lt;-</span> <span class="fu">workflow_set</span>(<span class="fu">list</span>(rec_camel), <span class="fu">list</span>(xgb_camel, dt_camel, rf_model_camel)) <span class="sc">%&gt;%</span></span>
 <span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">workflow_map</span>(<span class="st">&#39;fit_resamples&#39;</span>, <span class="at">resamples =</span> camels_cv) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>→ A | error:   [13:31:34] src/data/data.cc:461: Check failed: valid: Label contains NaN, infinity or a value too large.
+<pre><code>→ A | error:   [10:54:25] src/data/data.cc:461: Check failed: valid: Label contains NaN, infinity or a value too large.
                Stack trace:
-                 [bt] (0) 1   xgboost.so                          0x0000000150009c7c dmlc::LogMessageFatal::~LogMessageFatal() + 124
-                 [bt] (1) 2   xgboost.so                          0x00000001500a1460 xgboost::MetaInfo::SetInfoFromHost(xgboost::GenericParameter const&amp;, xgboost::StringView, xgboost::Json) + 3616
-                 [bt] (2) 3   xgboost.so                          0x00000001500a26e8 xgboost::MetaInfo::SetInfo(xgboost::GenericParameter const&amp;, char const*, void const*, xgboost::DataType, unsigned long) + 168
-                 [bt] (3) 4   xgboost.so                          0x00000001501c0184 XGDMatrixSetFloatInfo + 132
-                 [bt] (4) 5   xgboost.so                          0x0000000150004eec XGDMatrixSetInfo_R + 620
-                 [bt] (5) 6   libR.dylib                          0x0000000100b8c9b4 R_doDotCall + 1588
-                 [bt] (6) 7   libR.dylib                          0x0000000100be8cfc bcEval_loop + 128060
+                 [bt] (0) 1   xgboost.so                          0x0000000133809c7c dmlc::LogMessageFatal::~LogMessageFatal() + 124
+                 [bt] (1) 2   xgboost.so                          0x00000001338a1460 xgboost::MetaInfo::SetInfoFromHost(xgboost::GenericParameter const&amp;, xgboost::StringView, xgboost::Json) + 3616
+                 [bt] (2) 3   xgboost.so                          0x00000001338a26e8 xgboost::MetaInfo::SetInfo(xgboost::GenericParameter const&amp;, char const*, void const*, xgboost::DataType, unsigned long) + 168
+                 [bt] (3) 4   xgboost.so                          0x00000001339c0184 XGDMatrixSetFloatInfo + 132
+                 [bt] (4) 5   xgboost.so                          0x0000000133804eec XGDMatrixSetInfo_R + 620
+                 [bt] (5) 6   libR.dylib                          0x00000001033f89b4 R_doDotCall + 1588
+                 [bt] (6) 7   libR.dylib                          0x0000000103454cfc bcEval_loop + 128060
                  [bt] (7) </code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>There were issues with some computations   A: x1</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>There were issues with some computations   A: x2</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>There were issues with some computations   A: x9</code></pre>
@@ -5289,19 +5292,7 @@ aridity:p_mean  0.1048449 0.07198145   1.456555 1.458304e-01</code></pre>
 <div class="cell-output cell-output-stderr">
 <pre><code>→ A | error:   Error: Missing data in dependent variable.</code></pre>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>There were issues with some computations   A: x1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>There were issues with some computations   A: x3</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>There were issues with some computations   A: x9</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code></code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(wf_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(wf_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -5312,24 +5303,24 @@ aridity:p_mean  0.1048449 0.07198145   1.456555 1.458304e-01</code></pre>
 </div>
 <p>The random forest model is the best fit for the CAMEL data set. We can come to this conclusion by looking at the r squared values on the autoplot and can see that the random forest model has the highest one, meaning it will do the best job for this data set.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Extract and Evaluate</span></span>
-<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>rf_wf_camel <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_recipe</span>(rec_camel) <span class="sc">%&gt;%</span></span>
-<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(rf_model_camel) <span class="sc">%&gt;%</span></span>
-<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(<span class="at">data =</span> camel_train2) </span>
-<span id="cb61-6"><a href="#cb61-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb61-7"><a href="#cb61-7" aria-hidden="true" tabindex="-1"></a>rf_data2 <span class="ot">&lt;-</span> <span class="fu">augment</span>(rf_wf_camel, <span class="at">new_data =</span> camel_test2)</span>
-<span id="cb61-8"><a href="#cb61-8" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(rf_data2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Extract and Evaluate</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>rf_wf_camel <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_recipe</span>(rec_camel) <span class="sc">%&gt;%</span></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(rf_model_camel) <span class="sc">%&gt;%</span></span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(<span class="at">data =</span> camel_train2) </span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>rf_data2 <span class="ot">&lt;-</span> <span class="fu">augment</span>(rf_wf_camel, <span class="at">new_data =</span> camel_test2)</span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(rf_data2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 168  13</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(rf_data2, <span class="fu">aes</span>(<span class="at">x =</span> .pred, <span class="at">y =</span> logQmean)) <span class="sc">+</span></span>
-<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">&quot;skyblue&quot;</span>) <span class="sc">+</span></span>
-<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>() <span class="sc">+</span></span>
-<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_linedraw</span>() <span class="sc">+</span></span>
-<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Observed vs. Predicted LogQmean Values&quot;</span>,</span>
-<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Predicted Values&quot;</span>,</span>
-<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Observed Values&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(rf_data2, <span class="fu">aes</span>(<span class="at">x =</span> .pred, <span class="at">y =</span> logQmean)) <span class="sc">+</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">&quot;skyblue&quot;</span>) <span class="sc">+</span></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>() <span class="sc">+</span></span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_linedraw</span>() <span class="sc">+</span></span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Observed vs. Predicted LogQmean Values&quot;</span>,</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Predicted Values&quot;</span>,</span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Observed Values&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
